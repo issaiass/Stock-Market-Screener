@@ -49,6 +49,31 @@ prompt_merge.md             merge prompt
 .venv\Scripts\python .claude\skills\run-premarket-pipeline\run_pipeline.py --send none
 ```
 
+**Natural language (Claude Code):** open Claude Code in the project folder and say *"Build today's premarket report but don't send it anywhere."*
+
+## 🗣️ Use it in natural language
+
+You don't have to remember any command or flag. Open Claude Code in the project root (`claude`) and describe what you want; Claude picks the right skill and runs the same scripts shown in the code examples.
+
+**Best approach**
+
+1. **Start from the project root**, so the skills in `.claude/skills/` are loaded and `.venv` and `.env` are found.
+2. **Say the goal, plus any choices that matter:** topic or tickers, language, which channels send, how much effort, and when. Anything you leave out uses the default (Spanish, `low` effort, every configured channel).
+3. **Name the skill when you want to be sure.** Typing `/run-premarket-pipeline build today's report` always uses that skill. Plain sentences usually work too, because each skill describes when it should be used.
+4. **Ask for a dry run first** if you are unsure ("show me the plan, don't run it"): it maps to `--dry-run` and makes no billed AI calls.
+5. **Mind the cost.** A full run makes 3 billed `claude -p` calls, so Claude should confirm what it is about to run if your request is ambiguous.
+
+| You say | It maps to |
+|---|---|
+| "Build today's premarket report, don't send it" | `run_pipeline.py --send none` |
+| "Run the report in English with a deep dive on NVDA and AMD" | `--lang english --tickers NVDA,AMD --prompt "..."` |
+| "Send only to Telegram" | `--send telegram` |
+| "Test my email, Telegram and Discord keys with the last report" | `deliver.py reports\premarket_<date>.html REPORT.md` |
+| "Schedule it every weekday at 08:00 ET in English" | `schedule_windows.ps1 -TimeET 08:00 -PipelineArgs '--lang english'` (or `schedule_linux.sh`) |
+| "Did yesterday's picks work?" | `pick-scorer` (`score_picks.py`) |
+
+Each section below also shows its natural-language version next to the code.
+
 ## 📦 Install
 
 Needs [uv](https://docs.astral.sh/uv/), Python 3.14 and the [Claude Code CLI](https://claude.com/claude-code) (`claude` on PATH).
@@ -85,6 +110,8 @@ Uses an existing report, no AI calls, no cost. Every configured channel sends on
 .venv\Scripts\python .claude\skills\report-delivery\deliver.py reports\premarket_<date>.html REPORT.md
 ```
 
+**Natural language:** *"Test my delivery channels with the latest report, no AI calls."* (skill: `report-delivery`). Add *"and help me find my Telegram chat id"* if you need it.
+
 **Troubleshooting: what the output means**
 
 | Output line | Meaning / fix |
@@ -107,6 +134,13 @@ run_pipeline.py --send none                # build the report, send nothing
 deliver.py reports\premarket_<date>.html REPORT.md --only telegram   # test one channel
 ```
 
+**Natural language:**
+
+- *"Run the report and send it to Telegram only."*
+- *"Send it by email and Discord."*
+- *"Build the report but don't send anything."*
+- *"Test only Telegram with the last report."*
+
 Filters live in `.claude/skills/watchlist-criteria/WATCHLIST_CRITERIA.md` (spec), `.claude/skills/premarket-report/scripts/config.json` (standalone report) and `scan.py` (pipeline flags).
 
 </details>
@@ -121,6 +155,8 @@ Run from the project root. Paths assume Windows; on Linux use `.venv/bin/python`
 ```
 .venv\Scripts\python .claude\skills\run-premarket-pipeline\run_pipeline.py [options]
 ```
+
+**Natural language:** *"Run the full premarket pipeline."* Add the options in plain words: *"in English"* (`--lang`), *"with higher effort on the analyst"* (`--effort analyst=high`), *"include NVDA and AMD"* (`--tickers`), *"focus on semiconductors"* (`--prompt`), *"don't send it"* (`--send none`), *"just show me the plan"* (`--dry-run`).
 
 | Option | What it does | Default |
 |---|---|---|
@@ -144,6 +180,8 @@ Run from the project root. Paths assume Windows; on Linux use `.venv/bin/python`
 .venv\Scripts\python .claude\skills\report-renderer\render_report.py REPORT.md [YYYY-MM-DD]
 .venv\Scripts\python .claude\skills\report-delivery\deliver.py reports\premarket_<date>.html [REPORT.md]
 ```
+
+**Natural language:** *"Only gather the premarket data into packet.json"* (`premarket-gatherer`), *"Render REPORT.md to HTML and open it"* (`report-renderer`), *"Send the last report to my channels"* (`report-delivery`).
 
 Models: Sonnet (analyst), Haiku (second brain), Sonnet (merge), all at `low` effort unless you pass `--effort` (higher is slower and costs more). Change models in `MODELS` in `run_pipeline.py`.
 
@@ -170,13 +208,34 @@ python .claude\skills\run-premarket-pipeline\run_pipeline.py --send none --promp
 python .claude\skills\run-premarket-pipeline\run_pipeline.py --lang english
 ```
 
+**Natural language** (same order as the commands above):
+
+- *"Run the premarket report focused on semiconductors and technology, and explain which names have catalysts."*
+- *"Run it with NVDA and AMD added, as a deep dive on catalyst, key levels and risk."*
+- *"Include GLD, crude oil futures and TLT and give me the macro read for today."*
+- *"Run it without sending anything: which gappers look like sell-the-news traps?"*
+- *"Run the report in English."*
+
 - `--prompt` steers that run only (nothing is saved). It is added to the Sonnet, Haiku and merge prompts. Models use only packet data and say so if something is missing. Use quotes around it.
 - Without `--tickers`, only the top 12 gappers are in the data.
 - `--lang`: section titles, text and the date line are translated; tickers, numbers, price levels, emojis and original news headlines stay as they are. The HTML footer is translated for Spanish and English only (others fall back to English). The email subject stays in English.
 
 ## ⏰ Schedule
 
-Weekdays, default **08:15 ET**. Scripts are in `.claude/skills/run-premarket-pipeline/`.
+Weekdays, default **08:15 ET**. The scheduler belongs to the **`run-premarket-pipeline`** skill. Its scripts are in `.claude/skills/run-premarket-pipeline/`:
+
+| File | What it does |
+|---|---|
+| `schedule_windows.ps1` / `unschedule_windows.ps1` | Create / remove the Task Scheduler task `PremarketPipeline` |
+| `schedule_linux.sh` / `unschedule_linux.sh` | Add / remove the cron entry (Linux / macOS) |
+| `run_pipeline.py` | The pipeline the schedule runs |
+
+**How to call it**
+
+- **From the terminal:** run the script from that folder (commands in the table below).
+- **From Claude Code (natural language):** type `/run-premarket-pipeline` and ask it to schedule the report, for example *"Schedule it every weekday at 08:00 ET in English."* The skill runs the right script for your system. Other requests: *"Is the report scheduled?"* (check), *"Run the scheduled task now"* (test), *"Remove the schedule"* (unschedule).
+
+The schedule is saved by the operating system (Task Scheduler on Windows, crontab on Linux / macOS), not in the project.
 
 | | Windows (PowerShell) | Linux / macOS |
 |---|---|---|
@@ -197,6 +256,8 @@ Anything after the time is saved into the schedule and used on every run. It wor
 ./schedule_linux.sh 08:15 --prompt "Focus on semiconductors" --tickers NVDA,AMD --lang english --effort analyst=medium
 ```
 
+**Natural language:** *"Schedule the report at 08:15 ET every weekday, focused on semiconductors, with NVDA and AMD, in English, and medium effort on the analyst."*
+
 Telegram only, for example: `-PipelineArgs '--send telegram'` (Windows) or `./schedule_linux.sh 08:15 --send telegram` (Linux / macOS). Without flags, a scheduled run uses the default prompts, Spanish, low effort and every configured channel.
 
 ### Why 8:15 ET, and time zones
@@ -216,12 +277,14 @@ What you can do:
   ```
   .venv\Scripts\python .claude\skills\pick-scorer\score_picks.py
   ```
+  Natural language: *"How did yesterday's picks perform by conviction color?"* (skill: `pick-scorer`).
+
   After 30+ picks per color (green/yellow/red), if green doesn't beat the others, the scoring is noise: tune the prompts. Fills are theoretical.
 - **Tune the prompts.** `prompt_sonnet.md`, `prompt_haiku.md`, `prompt_merge.md` and the example in `.claude/skills/report-template/EXAMPLE_REPORT.md` (fictional content, copy its depth and tone).
 
 ## 🧩 Skills
 
-Live in `.claude/skills/`; use them as `/name` in Claude Code.
+Live in `.claude/skills/`; use them as `/name` in Claude Code, or just describe the task in natural language (for example *"Top 10 liquid momentum movers in semiconductors with their latest catalyst and earnings date"* uses `catalyst-screener`; *"Audit my broker CSV"* uses `pnl-audit`).
 
 | Area | Skills |
 |---|---|
