@@ -1,0 +1,12 @@
+flowchart TD
+    A["Yahoo Finance + RSS + economic calendar"] --> B["scan.py"]
+    B --> C[("packet.json")]
+    C --> D["Sonnet - analyst"]
+    C --> E["Haiku - skeptic, blind"]
+    D --> F["Merge - Sonnet"]
+    E --> F
+    F --> G["REPORT.md"]
+    G --> H["HTML report"]
+    H --> I["Email"]
+    H --> J["Telegram"]
+    H --> K["Discord"]

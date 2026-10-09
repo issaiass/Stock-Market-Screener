@@ -1,0 +1,88 @@
+# --- Secrets / environment (keep .env.example tracked) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+credentials.json
+
+# --- Python virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.hypothesis/
+.tox/
+.nox/
+.cache/
+
+# --- Packaging / build ---
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+pip-wheel-metadata/
+pip-log.txt
+
+# --- Coverage ---
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Generated pipeline output (premarket packet, reports, logs) ---
+logs/
+reports/
+packet.json
+REPORT.md
+*.log
+
+# --- yfinance / data caches ---
+*.sqlite
+*.sqlite3
+*.db
+*.parquet
+*.feather
+*.pkl
+*.pickle
+
+# --- Claude Code local state ---
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# --- IDEs / editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# --- Temp ---
+*.tmp
+*.bak
+*.orig

@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant S as Scheduler / you
+    participant P as run_pipeline.py
+    participant G as scan.py
+    participant A as Sonnet (analyst)
+    participant H as Haiku (skeptic)
+    participant M as Sonnet (merge)
+    participant D as deliver.py
+    S->>P: start (flags: prompt, tickers, lang, effort, send)
+    P->>G: gather data
+    G-->>P: packet.json
+    P->>A: packet + prompt_sonnet.md
+    P->>H: packet + prompt_haiku.md
+    A-->>P: analyst view
+    H-->>P: second view
+    P->>M: both views + prompt_merge.md
+    M-->>P: REPORT.md
+    P->>P: render HTML, log picks
+    P->>D: send to chosen channels
+    D-->>S: email, Telegram, Discord

@@ -1,0 +1,32 @@
+{
+  "universe": {
+    "min_market_cap": 800000000,
+    "min_price": 3,
+    "max_pages": 14,
+    "extra_tickers": []
+  },
+  "watchlists": {
+    "day_trading": {
+      "min_gap_pct": 3.0,
+      "min_price": 3,
+      "min_market_cap": 1000000000,
+      "min_premarket_rvol": 1.5,
+      "require_above_prior_high": true
+    },
+    "swing": {
+      "min_gap_pct": 8.0,
+      "min_price": 3,
+      "min_market_cap": 800000000,
+      "require_above_prior_high": true,
+      "require_above_sma200": true,
+      "require_catalyst": true
+    }
+  },
+  "report": {
+    "news_lookback_hours": 18,
+    "econ_countries": ["USD"],
+    "econ_impacts": ["High", "Medium"],
+    "options_flow_top_n": 8,
+    "output_dir": "reports"
+  }
+}
